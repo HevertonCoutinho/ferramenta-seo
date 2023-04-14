@@ -1,1 +1,3 @@
 # ferramenta-seo
+
+#dependencias
