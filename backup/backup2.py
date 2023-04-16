@@ -29,7 +29,7 @@ soup = BeautifulSoup(response.content, 'html.parser')
 
 # Verifica se a página foi acessada com sucesso
 if response.status_code == 200:
-    print(Fore.GREEN +'\n-----------Iniciando varredura...'+ Fore.RESET)
+        
     def verificar_conteudo():
     
         print(Fore.BLUE +'\n-----------Analise de conteúdo...'+ Fore.RESET)
@@ -50,7 +50,8 @@ if response.status_code == 200:
             print(f'Descrição encontrada com {desc_length} caracteres: {desc_text}')
         else:
             print('Não foi encontrada a descrição da página.')
-             
+     
+        
     def verificar_responsividade(url):
         
         # Define as resoluções de tela a serem testadas
@@ -142,10 +143,10 @@ if response.status_code == 200:
         if 'noindex' in soup.find('meta', attrs={'name': 'robots'}).get('content').lower():
             print('A página não está indexada')
         else:
-            print('A página é indexavel')
+            print('A página está indexada')
 
     def verificar_dados():
-        print(Fore.BLUE +'\n----------Analise de dados estruturados...'+ Fore.RESET)
+        print(Fore.BLUE +'\n----------Analise de links e dados estruturados...'+ Fore.RESET)
         # Verifica se existem dados estruturados
         structured_data_types = []
         scripts = soup.find_all('script', type='application/ld+json')
@@ -163,118 +164,85 @@ if response.status_code == 200:
                 print('- ' + data_type)
         else:
             print('A página não contém dados estruturados')
-        return structured_data_types
-                        
-    # Extrai todos os links da página
+            
+        # Extrai todos os links da página
     links = soup.find_all('a')
     def count_unique_links(links, url):
-        print(Fore.BLUE +'\n----------Analise de linkagem interna...'+ Fore.RESET)
-        unique_links = []
-        links_with_params = []
-        broken_links = []
-        redirect_links = []
-        links_server_error = []
+            unique_links = []
+            links_with_params = []
+            broken_links = []
+            redirect_links = []
+            links_server_error = []
 
-        parsed_base_url = urlparse(url)
+            parsed_base_url = urlparse(url)
 
-        for link in links:
-            href = link.get('href')
-            if href:
-                if href.startswith('/'):
-                    href = urljoin(url, href)
-                elif not href.startswith('http'):
-                    href = urljoin(parsed_base_url.scheme + "://" + parsed_base_url.netloc, href)
+            for link in links:
+                href = link.get('href')
+                if href:
+                    if href.startswith('/'):
+                        href = urljoin(url, href)
+                    elif not href.startswith('http'):
+                        href = urljoin(parsed_base_url.scheme + "://" + parsed_base_url.netloc, href)
 
-                if href not in unique_links:
-                    unique_links.append(href)
+                    if href not in unique_links:
+                        unique_links.append(href)
 
-                if '?' in href:
-                    links_with_params.append(href)
+                    if '?' in href:
+                        links_with_params.append(href)
 
-                try:
-                    response = requests.head(href)
-                    status_code = response.status_code
-                    if status_code >= 300 and status_code < 400:
-                        print(f"Redirect link found: {href} ({status_code})")
-                        redirect_links.append(href)
-                    elif status_code >= 400 and status_code < 500:
-                        print(f"Client error link found: {href} ({status_code})")
-                        broken_links.append(href)
-                    elif status_code >= 500 and status_code < 600:
-                        print(f"Server error link found: {href} ({status_code})")
-                        links_server_error.append(href)
-                except requests.exceptions.RequestException:
-                    print(f"Error connecting to link: {href}")
+                    try:
+                        response = requests.head(href)
+                        status_code = response.status_code
+                        if status_code >= 300 and status_code < 400:
+                            print(f"Redirect link found: {href} ({status_code})")
+                            redirect_links.append(href)
+                        elif status_code >= 400 and status_code < 500:
+                            print(f"Client error link found: {href} ({status_code})")
+                            broken_links.append(href)
+                        elif status_code >= 500 and status_code < 600:
+                            print(f"Server error link found: {href} ({status_code})")
+                            links_server_error.append(href)
+                    except requests.exceptions.RequestException:
+                        print(f"Error connecting to link: {href}")
 
-        unique_links_count = len(unique_links)
-        links_with_params_count = len(links_with_params)
-        broken_links_count = len(broken_links)
-        redirect_links_count = len(redirect_links)
-        links_server_error_count = len(links_server_error)
-        
+            unique_links_count = len(unique_links)
+            links_with_params_count = len(links_with_params)
+            broken_links_count = len(broken_links)
+            redirect_links_count = len(redirect_links)
+            links_server_error_count = len(links_server_error)
+            
 
-        print(f"A página possui {unique_links_count} links únicos.")
-        print(f"{links_with_params_count} dos links contêm parâmetros de URL.")
-        print(f"{redirect_links_count} dos links retornaram status 3xx")
-        print(f"{broken_links_count} dos links retornaram status 4xx")
-        print(f"{links_server_error_count} dos links retornaram status 5xx")
+            print(f"A página possui {unique_links_count} links únicos.")
+            print(f"{links_with_params_count} dos links contêm parâmetros de URL.")
+            print(f"{redirect_links_count} dos links retornaram status 3xx")
+            print(f"{broken_links_count} dos links retornaram status 4xx")
+            print(f"{links_server_error_count} dos links retornaram status 5xx")
 
-        return {"unique_links": unique_links_count, "links_with_params": links_with_params_count, "broken_links": broken_links_count, "redirect_links": redirect_links_count, "links_server_error": links_server_error_count}       
+            return {"unique_links": unique_links_count, "links_with_params": links_with_params_count, "broken_links": broken_links_count, "redirect_links": redirect_links_count, "links_server_error": links_server_error_count}       
 else:
     print('Não foi possível acessar a página')
-    
+  
 verificar_rastreabilidade()
-structured_data_types = verificar_dados()    
+verificar_dados()    
 verificar_responsividade(url)
-resultado = count_unique_links(links, url)
+count_unique_links(links, url)
 verificar_conteudo()
 
-#-------------------------------Relatorio de Melhorias-------------------------------------
+#-------------------------------Diagnostico-------------------------------------
 
-print(Fore.GREEN +'\n-----------Iniciando Auditoria...'+ Fore.RESET)
 def diagnostico_de_links(redirect_links, broken_links, links_server_error):
+    print("Possíveis impactos negativos em relação a analise dos erros encontrados:")
     if not redirect_links and not broken_links and not links_server_error:
-        print('Nenhum erro relacionado a linkagem interna.')
+        print('nenhum erro encontrado')
     else:
-        print("Segue lista de Erros relacionado a linkagem interna da páginas\n e possíveis melhorias a serem aplicadas:")
         if redirect_links:
-            print(Fore.BLUE +'\nProblema: Erros 3xx '+ Fore.RESET)
-            print("- Impacto: Problemas de rastreabilidade, redução da autoridade da página e Impacto negativo na experiência do usuário devido a presença de redirecionamentos.")
-            print(Fore.BLUE +'\nSolução:'+ Fore.RESET)
-            print("- Remova os redirecionamentos internos presentes na página")
+            print("- Problemas de rastreabilidade, redução da autoridade da página e Impacto negativo na experiência do usuário devido a presença de redirecionamentos.")
 
         if broken_links:
-            print(Fore.BLUE +'\nProblema: Erros 4xx '+ Fore.RESET)
-            print("- Impacto: Experiência do usuário prejudicada e autoridade sendo dissipada, devido a presença de linkagem interna para páginas quebradas.")
-            print(Fore.BLUE +'\nSolução:'+ Fore.RESET)
-            print("- Remova as linkagens internas e redirecione os URLs quebrados")
+            print("- Impacto negativo na experiência do usuário e autoridade sendo dissipada, devido a presença de linkagem interna para páginas quebradas.")
 
         if links_server_error:
-            print(Fore.BLUE +'\nProblema: Erros 3xx '+ Fore.RESET)
-            print("- Impacto: Redução da autoridade e possível desindexação das páginas linkadas com erros 5xx.")
-            print(Fore.BLUE +'\nSolução:'+ Fore.RESET)
-            print("- Verifique se seu servidor esta passando por alguma instabilidade. Caso o problema persista apenas para estas páginas, substitua os URLs linkados.")
+            print("- Redução da autoridade e possível desindexação das páginas linkadas com erros 5xx.")
 
+resultado = count_unique_links(links, url)
 diagnostico_de_links(resultado["redirect_links"], resultado["broken_links"], resultado["links_server_error"])
-
-def diagnostico_dados_estruturados(structured_data_types):
-    # Verifica se a página é um blog ou um site
-    if 'blog.' in url or '/blog' in url:
-        tipo_pagina = 'blog'
-        dados_ideais = ['Article', 'BreadcrumbList', 'WebPage']
-    else:
-        tipo_pagina = 'site'
-        dados_ideais = ['Organization', 'WebSite', 'SearchAction']
-
-    # Verifica se a página possui todos os dados estruturados ideais para o tipo de página
-    faltando = set(dados_ideais) - set(structured_data_types)
-    if faltando:
-        print(f'\nA página ainda não contém os seguintes dados estruturados. \nExperimente coloca-los pois são ideais para páginas de {tipo_pagina}.: ') 
-        for data_type in faltando:    
-            print('- ' + data_type)
-            
-    else:
-        print(f'\nSua página contém todos os dados estruturados ideais para {tipo_pagina}.')
-
-# Chama função
-diagnostico_dados_estruturados(structured_data_types)
